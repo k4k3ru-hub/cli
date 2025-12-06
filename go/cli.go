@@ -121,7 +121,6 @@ func (cli *CLI) Run() {
         }
         return
     }
-    
 
     // Run command.
     cli.Command.run(cli.Command.Options, args)
