@@ -6,7 +6,7 @@ package main
 import (
 	"fmt"
 
-	"github.com/k4k3ru-hub/cli-go"
+	"github.com/k4k3ru-hub/cli/go"
 )
 
 
