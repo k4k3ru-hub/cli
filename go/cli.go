@@ -139,6 +139,18 @@ func (cmd *Command) SetDefaultConfigOption() {
 }
 
 
+func (cmd *Command) GetOption(optionName string) *Option {
+    if cmd == nil || optionName == "" {
+        return nil
+    }
+    opt, ok := cmd.Options[optionName]
+    if opt == nil || !ok {
+        return nil
+    }
+    return opt
+}
+
+
 //
 // Set version option
 //
