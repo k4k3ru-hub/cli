@@ -12,19 +12,23 @@ func main() {
 	// Initialize CLI.
 	myCLI := cli.NewCLI(mainFunc)
 	myCLI.SetVersion("1.0.0")
-	myCLI.Command.SetDefaultConfigOption()
+	if err := myCLI.Root().AddDefaultConfigOption(); err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		os.Exit(1)
+	}
 
 	// Add `list` command.
 	listCommand := cli.NewCommand("list")
 	listCommand.SetUsage("List the configuration.")
 	listCommand.SetAction(listFunc)
-	if err := listCommand.AddOption("local", &cli.Option{
-		Alias: "l",
+	if err := listCommand.AddOption("local", cli.Option{
+		Alias:  "l",
+		IsFlag: true,
 	}); err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
-	if err := myCLI.Command.AddCommand(listCommand); err != nil {
+	if err := myCLI.Root().AddCommand(listCommand); err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
@@ -32,7 +36,7 @@ func main() {
 	// Add `push` command.
 	pushCommand := cli.NewCommand("push")
 	pushCommand.SetUsage("Push the source code.")
-	if err := myCLI.Command.AddCommand(pushCommand); err != nil {
+	if err := myCLI.Root().AddCommand(pushCommand); err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
@@ -41,9 +45,9 @@ func main() {
 	pushOriginCommand := cli.NewCommand("origin")
 	pushOriginCommand.SetUsage("Push the source code to the origin.")
 	pushOriginCommand.SetAction(pushOringFunc)
-	if err := pushOriginCommand.AddOption("url", &cli.Option{
-		Alias: "u",
-		Value: "https://exmaple.com",
+	if err := pushOriginCommand.AddOption("url", cli.Option{
+		Alias:        "u",
+		DefaultValue: "https://example.com",
 	}); err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
@@ -60,25 +64,35 @@ func main() {
 	}
 }
 
-func mainFunc(cmd *cli.Command) error {
-	for _, o := range cmd.Options() {
-		fmt.Printf("%v\n", o)
+func mainFunc(ctx *cli.Context) error {
+	for _, o := range ctx.Options() {
+		if _, err := fmt.Fprintf(ctx.Output(), "%v\n", o); err != nil {
+			return fmt.Errorf("failed to output root command option: %w", err)
+		}
 	}
 	return nil
 }
 
-func listFunc(cmd *cli.Command) error {
-	fmt.Printf("Started list func.\n")
-	for _, o := range cmd.Options() {
-		fmt.Printf("%v\n", o)
+func listFunc(ctx *cli.Context) error {
+	if _, err := fmt.Fprintln(ctx.Output(), "Started list func."); err != nil {
+		return fmt.Errorf("failed to output list command status: %w", err)
+	}
+	for _, o := range ctx.Options() {
+		if _, err := fmt.Fprintf(ctx.Output(), "%v\n", o); err != nil {
+			return fmt.Errorf("failed to output list command option: %w", err)
+		}
 	}
 	return nil
 }
 
-func pushOringFunc(cmd *cli.Command) error {
-	fmt.Printf("Started push origin func.\n")
-	for _, o := range cmd.Options() {
-		fmt.Printf("%v\n", o)
+func pushOringFunc(ctx *cli.Context) error {
+	if _, err := fmt.Fprintln(ctx.Output(), "Started push origin func."); err != nil {
+		return fmt.Errorf("failed to output push origin command status: %w", err)
+	}
+	for _, o := range ctx.Options() {
+		if _, err := fmt.Fprintf(ctx.Output(), "%v\n", o); err != nil {
+			return fmt.Errorf("failed to output push origin command option: %w", err)
+		}
 	}
 	return nil
 }
