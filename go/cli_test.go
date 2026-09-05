@@ -77,6 +77,43 @@ func TestCommandUsageText(t *testing.T) {
 	}
 }
 
+// TestCommandMetadata verifies command metadata accessors return safe values.
+func TestCommandMetadata(t *testing.T) {
+	root := cli.NewCommand("root")
+	root.SetUsage("Root command.")
+	child := cli.NewCommand("child")
+	if err := root.AddCommand(child); err != nil {
+		t.Fatalf("AddCommand() returned an unexpected error: %v", err)
+	}
+
+	if root.Name() != "root" {
+		t.Fatalf("Name() = %q, want %q", root.Name(), "root")
+	}
+	if root.Usage() != "Root command." {
+		t.Fatalf("Usage() = %q, want %q", root.Usage(), "Root command.")
+	}
+	commands := root.Commands()
+	if len(commands) != 1 || commands[0] != child {
+		t.Fatalf("Commands() = %#v, want the registered child", commands)
+	}
+	commands[0] = nil
+	if root.Commands()[0] != child {
+		t.Fatal("Commands() exposed the command slice")
+	}
+	if root.HasAction() {
+		t.Fatal("HasAction() = true before an action was registered")
+	}
+	root.SetAction(func(*cli.Context) error { return nil })
+	if !root.HasAction() {
+		t.Fatal("HasAction() = false after an action was registered")
+	}
+
+	var nilCommand *cli.Command
+	if nilCommand.Name() != "" || nilCommand.Usage() != "" || nilCommand.Commands() != nil || nilCommand.HasAction() {
+		t.Fatal("nil command metadata accessors returned non-zero values")
+	}
+}
+
 // Test action error.
 func TestActionError(t *testing.T) {
 	expected := errors.New("action failed")

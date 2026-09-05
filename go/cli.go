@@ -191,6 +191,59 @@ func (cmd *Command) SetUsage(usage string) {
 	cmd.usage = usage
 }
 
+// Name returns the command name.
+//
+// Returns:
+//   - Command name.
+//
+// Version:
+//   - 2026-08-27: Added.
+func (cmd *Command) Name() string {
+	if cmd == nil {
+		return ""
+	}
+	return cmd.name
+}
+
+// Usage returns the command description.
+//
+// Returns:
+//   - Command description.
+//
+// Version:
+//   - 2026-08-27: Added.
+func (cmd *Command) Usage() string {
+	if cmd == nil {
+		return ""
+	}
+	return cmd.usage
+}
+
+// Commands returns a copy of the direct subcommand list.
+//
+// Returns:
+//   - Direct subcommands in registration order.
+//
+// Version:
+//   - 2026-08-27: Added.
+func (cmd *Command) Commands() []*Command {
+	if cmd == nil {
+		return nil
+	}
+	return append([]*Command(nil), cmd.commands...)
+}
+
+// HasAction reports whether the command has an executable action.
+//
+// Returns:
+//   - True when an action is registered.
+//
+// Version:
+//   - 2026-08-28: Added.
+func (cmd *Command) HasAction() bool {
+	return cmd != nil && cmd.action != nil
+}
+
 // AddCommand adds a subcommand.
 //
 // Parameters:
