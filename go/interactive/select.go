@@ -256,9 +256,7 @@ func renderSelection(output io.Writer, label string, filter []rune, options []Se
 	content.WriteString("\r\n")
 	content.WriteString(styledText(output, "Type to filter · ↑↓ Select · Enter Confirm", ansiDim))
 	linesBelow := 3
-	if len(filtered) == 0 {
-		linesBelow++
-	} else {
+	if len(filtered) > 0 {
 		linesBelow += end - start
 		if len(filtered) > visibleLimit {
 			linesBelow++

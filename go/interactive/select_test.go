@@ -3,9 +3,43 @@ package interactive
 import (
 	"bytes"
 	"context"
+	"regexp"
+	"strconv"
 	"strings"
 	"testing"
 )
+
+// TestSelectionRedrawPreservesPromptRow verifies filtering never moves into prior console output.
+//
+// Version:
+//   - 2026-09-16: Added.
+func TestSelectionRedrawPreservesPromptRow(t *testing.T) {
+	options := []SelectOption{{Value: "usdc", Label: "USDC"}, {Value: "weth", Label: "WETH"}}
+	moveUp := regexp.MustCompile("\x1b\\[([0-9]+)A")
+	row := 10 // Previous setup output occupies rows above this prompt.
+	for _, filter := range []string{"", "1", "11", "111", "11", "1", "", "usd", "missing", ""} {
+		var output bytes.Buffer
+		if err := renderSelection(&output, "Approval token", []rune(filter), options, 0, 1); err != nil {
+			t.Fatal(err)
+		}
+		frame := output.String()
+		row += strings.Count(frame, "\n")
+		moves := moveUp.FindAllStringSubmatch(frame, -1)
+		if len(moves) != 1 {
+			t.Fatalf("expected one cursor return: %q", frame)
+		}
+		for _, match := range moves {
+			count, err := strconv.Atoi(match[1])
+			if err != nil {
+				t.Fatal(err)
+			}
+			row -= count
+		}
+		if row != 10 {
+			t.Fatalf("filter=%q returned to row %d, want prompt row 10", filter, row)
+		}
+	}
+}
 
 func TestPromptSelectLine(t *testing.T) {
 	var output bytes.Buffer
