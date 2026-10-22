@@ -2,6 +2,9 @@
 
 This project provides a customizable CLI (Command Line Interface) tool written in Go. It supports multiple commands, options, and subcommands with versioning and configuration capabilities.
 
+Development and verification use Go 1.27.3. The module's minimum Go version
+remains 1.21.6; `go.mod` selects the development toolchain separately.
+
 
 ## Features
 
